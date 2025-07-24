@@ -24,7 +24,7 @@ const AutomateResumePage = ({ navigate }) => {
     const handleAutomatedEnhance = async (resumeText) => {
         setStatus({ aiLoading: true, error: '' });
         try {
-            const response = await axios.post('http://matrixxai-production.up.railway.app, { resumeText });
+            const response = await axios.post('https://matrixxai-production.up.railway.app, { resumeText });
             const { originalResume, enhancedResume } = response.data;
             if (!originalResume || !enhancedResume) {
                 throw new Error("AI response was not structured correctly.");
