@@ -7,6 +7,7 @@ import { LoaderCircle, UploadCloud } from 'lucide-react';
 import ReviewChangesModal from '../components/common/ReviewChangesModal';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 
+// Setup worker for pdf.js. This is crucial for it to work in the browser.
 pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
 
 const initialResumeState = {
@@ -24,7 +25,10 @@ const AutomateResumePage = ({ navigate }) => {
     const handleAutomatedEnhance = async (resumeText) => {
         setStatus({ aiLoading: true, error: '' });
         try {
-            const response = await axios.post('https://matrixxai-production.up.railway.app, { resumeText });
+            // Use the VITE_ variable for the deployed API URL
+            const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/ai/enhance-resume`;
+            const response = await axios.post(apiUrl, { resumeText });
+
             const { originalResume, enhancedResume } = response.data;
             if (!originalResume || !enhancedResume) {
                 throw new Error("AI response was not structured correctly.");
@@ -34,6 +38,7 @@ const AutomateResumePage = ({ navigate }) => {
             setIsReviewModalOpen(true);
         } catch (err) {
             const errorMessage = err.response?.data?.error || 'An unknown error occurred.';
+            console.error("Enhancement Error:", err);
             setStatus({ aiLoading: false, error: errorMessage });
         } finally {
             setStatus(s => ({ ...s, aiLoading: false }));
