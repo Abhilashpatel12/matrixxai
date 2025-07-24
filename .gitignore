@@ -1,0 +1,20 @@
+# Node modules (both client and server)
+client/node_modules/
+server/node_modules/
+
+# Environment variables
+client/.env
+server/.env
+.env
+
+# Firebase Admin Key
+firebase-admin.json
+
+# Mac system files
+.DS_Store
+
+# Logs
+*.log
+
+# Vite/React cache
+client/dist/
