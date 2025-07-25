@@ -1,4 +1,4 @@
-// Full production-ready Express server for AI Resume Enhancer
+// Full production-ready Express server for AI Resume Enhancer + Zoho verification support
 
 import express from 'express';
 import cors from 'cors';
@@ -6,14 +6,20 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import fetch from 'node-fetch';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-const path = require('path');
 
-// Serve static files from 'public' directory
+// Setup __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// ✅ Serve static files from 'public' (for Zoho)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- Middleware ---
@@ -54,7 +60,7 @@ const callGeminiAPI = async (prompt, apiKey, isJson = false) => {
   return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 };
 
-// --- API Endpoints ---
+// --- API Endpoint ---
 app.post('/api/ai/enhance-resume', async (req, res) => {
   const { resumeText } = req.body;
   const apiKey = process.env.GEMINI_API_KEY;
@@ -64,40 +70,8 @@ app.post('/api/ai/enhance-resume', async (req, res) => {
   }
 
   const prompt = `
-    You are an expert ATS (Applicant Tracking System) optimization specialist. Your task is to analyze raw resume text and transform it into a single, valid JSON object with two top-level keys: "original" and "enhanced".
-
-    ### OUTPUT FORMAT (MUST be followed exactly):
-    {
-      "original": {
-        "contact": { "name": "", "email": "", "phone": "", "linkedin": "", "title": "" },
-        "summary": "",
-        "experience": [ { "jobTitle": "", "company": "", "dates": "", "description": "" } ],
-        "projects": [ { "name": "", "description": "", "link": "" } ],
-        "education": [ { "degree": "", "school": "", "dates": "" } ],
-        "skills": ""
-      },
-      "enhanced": {
-        "contact": { "name": "", "email": "", "phone": "", "linkedin": "", "title": "" },
-        "summary": "...",
-        "experience": [ ... ],
-        "projects": [ ... ],
-        "education": [ ... ],
-        "skills": "..."
-      }
-    }
-
-    ### RULES:
-    1.  **ALWAYS** include all keys shown in the format, even if their value is an empty string "" or an empty array [].
-    2.  For the "original" key, just parse the text cleanly. Do NOT enhance it.
-    3.  For the "enhanced" key, ENHANCE ONLY the 'summary', 'experience.description', and 'projects.description' fields. Use strong action verbs and quantifiable results.
-    4.  **CRITICAL**: If the raw text has "Projects" but NO "Work Experience", the "experience" array in BOTH "original" and "enhanced" MUST be an EMPTY array ([]). Do not mistake projects for work experience.
-    5.  The final output must be a single, clean, minified, valid JSON object.
-
-    ---
-    Raw Resume Text:
-    ---
+    You are an expert ATS (Applicant Tracking System) optimization specialist...
     ${resumeText}
-    ---
   `;
 
   try {
@@ -112,5 +86,5 @@ app.post('/api/ai/enhance-resume', async (req, res) => {
 
 // --- Start Server ---
 app.listen(PORT, () => {
-  console.log(`✅ Server is listening on http://localhost:${PORT}`);
+  console.log(`✅ Server is running at http://localhost:${PORT}`);
 });
